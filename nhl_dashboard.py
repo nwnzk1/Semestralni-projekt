@@ -83,7 +83,7 @@ def get_team_standings(conference=None):
     return df
 
 # --- UI LAYOUT ---
-st.title("NHL Professional Analytics")
+st.title("NHL Stats Centre")
 
 # SIDEBAR NAVIGATION
 view = st.sidebar.radio("Navigation", ["Whole League", "Conference", "Team stats"])
@@ -172,4 +172,5 @@ elif view == "Team stats":
                 "Player": f"{p['firstName']['default']} {p['lastName']['default']}",
                 "G": p.get('goals', 0), "A": p.get('assists', 0), "P": p.get('points', 0)
             } for p in stats['skaters']])
+
             st.dataframe(sk_df.sort_values("P", ascending=False), hide_index=True, use_container_width=True)
