@@ -39,7 +39,7 @@ def fetch_api(endpoint, params=None):
     except: return None
 
 @st.cache_data
-def get_leader_stats(player_type="skater", category="points", conference=None):
+def get_leader_stats(player_type, category, conference):
     endpoint = f"{player_type}-stats-leaders/{SEASON}/2"
     limit = 40 if conference else 10
     data = fetch_api(endpoint, {"categories": category, "limit": limit})
@@ -182,6 +182,7 @@ elif view == "Team stats":
                     "Save %": f"{p.get('savePercentage', 0):.3f}"
                 } for p in stats.get('goalies', [])])
                 st.dataframe(gl_df.sort_values("Wins", ascending=False), hide_index=True, use_container_width=True)
+
 
 
 
