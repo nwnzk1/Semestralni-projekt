@@ -1,101 +1,15 @@
 import streamlit as st
-import requests
 import pandas as pd
+from interni_databze import SEASON, TEAM_HISTORY, NHL_LOGO_URL
+from api_manager import fetch_api, get_logo_url, get_leader_stats, get_team_standings
+from ui_configs import main_config, standings_config
 
-# Načtení dat, nastavení webové stránky, branding
-BASE_URL = "https://api-web.nhle.com/v1"
-SEASON = "20252026"  
 st.set_page_config(page_title="NHL Stats Center", layout="wide")
-
-NHL_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NHL_light.svg"
 st.logo(NHL_LOGO_URL, size="large")
 
-def get_logo_url(abbr):
-    return f"https://assets.nhle.com/logos/nhl/svg/{abbr}_light.svg"
-
-# Interní databáze
-TEAM_HISTORY = {
-    "MTL": [24, 26, 0], "TOR": [13, 0, 0],  "DET": [11, 6, 6], 
-    "BOS": [6, 5, 4],   "CHI": [6, 2, 2],   "EDM": [5, 10, 2], 
-    "PIT": [5, 6, 1],   "NYR": [4, 4, 4],   "NYI": [4, 6, 0], 
-    "NJD": [3, 5, 0],   "COL": [3, 3, 3],   "TBL": [3, 5, 1], 
-    "FLA": [2, 4, 1],   "LAK": [2, 3, 0],   "PHI": [2, 8, 0], 
-    "DAL": [1, 3, 2],   "STL": [1, 1, 1],   "CAR": [1, 3, 0], 
-    "ANA": [1, 2, 0],   "VGK": [1, 2, 0],   "WSH": [1, 2, 3],
-    "VAN": [0, 3, 2],   "BUF": [0, 2, 1],   "OTT": [0, 1, 1],
-    "SJS": [0, 1, 1],   "NSH": [0, 1, 1],   "WPG": [0, 0, 1],
-    "CGY": [1, 3, 2]
-}
-
-EAST = ["BOS", "BUF", "DET", "FLA", "MTL", "OTT", "TBL", "TOR", "CAR", "CBJ", "NJD", "NYI", "NYR", "PHI", "PIT", "WSH"]
-WEST = ["CHI", "COL", "DAL", "MIN", "NSH", "STL", "WPG", "UTA", "ANA", "CGY", "EDM", "LAK", "SEA", "SJS", "VAN", "VGK"]
-
-# Správa dat
-@st.cache_data
-def fetch_api(endpoint, params=None):
-    try:
-        res = requests.get(f"{BASE_URL}/{endpoint}", params=params, timeout=10)
-        return res.json() if res.status_code == 200 else None
-    except: return None
-
-@st.cache_data
-def get_leader_stats(player_type, category, conference):
-    endpoint = f"{player_type}-stats-leaders/{SEASON}/2"
-    limit = 40 if conference else 10
-    data = fetch_api(endpoint, {"categories": category, "limit": limit})
-    
-    if not data or category not in data: return pd.DataFrame()
-    
-    rows = []
-    for p in data[category]:
-        abbr = p['teamAbbrev']
-        if conference == "Eastern" and abbr not in EAST: continue
-        if conference == "Western" and abbr not in WEST: continue
-        
-        rows.append({
-            "Player": f"{p['firstName']['default']} {p['lastName']['default']}",
-            "Team": get_logo_url(abbr),
-            "Value": p['value']
-        })
-    return pd.DataFrame(rows).head(10)
-
-@st.cache_data
-def get_team_standings(conference=None):
-    data = fetch_api("standings/now")
-    if not data or 'standings' not in data: return pd.DataFrame()
-    
-    rows = []
-    for t in data['standings']:
-        abbr = t['teamAbbrev']['default']
-        if conference == "Eastern" and abbr not in EAST: continue
-        if conference == "Western" and abbr not in WEST: continue
-        
-        rows.append({
-            "Team": get_logo_url(abbr),
-            "Team Name": t['teamName']['default'],
-            "Points": t['points'],
-            "GP": t['gamesPlayed']
-        })
-    df = pd.DataFrame(rows).sort_values(by="Points", ascending=False)
-    return df
-
-### 4. Práce s daty, vizuální nastavení aplikaci
 st.title("NHL Stats Centre")
 
 view = st.sidebar.radio("Navigation", ["Whole League", "Conference", "Team stats"])
-
-main_config = {
-    "Player": st.column_config.TextColumn("Player"),
-    "Team": st.column_config.ImageColumn("Team", width="small"),
-    "Value": st.column_config.NumberColumn("Stat")
-}
-
-standings_config = {
-    "Team": st.column_config.ImageColumn("Logo", width="small"),
-    "Team Name": st.column_config.TextColumn("Team"),
-    "Points": st.column_config.NumberColumn("Points"),
-    "GP": st.column_config.NumberColumn("Games Played")
-}
 
 if view == "Whole League" or view == "Conference":
     conf_name = None
@@ -172,7 +86,6 @@ elif view == "Team stats":
                 } for p in stats.get('skaters', [])])
                 st.dataframe(sk_df.sort_values("P", ascending=False), hide_index=True, use_container_width=True)
 
-           
             st.subheader("Goalies roster")
             goalies_raw = pd.DataFrame(stats.get('goalies', []))
             if not goalies_raw.empty:
@@ -182,6 +95,7 @@ elif view == "Team stats":
                     "Save %": f"{p.get('savePercentage', 0):.3f}"
                 } for p in stats.get('goalies', [])])
                 st.dataframe(gl_df.sort_values("Wins", ascending=False), hide_index=True, use_container_width=True)
+
 
 
 
