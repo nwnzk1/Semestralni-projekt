@@ -2,16 +2,18 @@ import streamlit as st
 import requests
 import pandas as pd
 
-# 
+# Načtení dat, nastavení webové stránky, branding
 BASE_URL = "https://api-web.nhle.com/v1"
 SEASON = "20252026"  
-st.set_page_config(page_title="NHL Stats Center")
+st.set_page_config(page_title="NHL Stats Center", layout="wide")
 
-# NHL Branding
 NHL_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NHL_light.svg"
 st.logo(NHL_LOGO_URL, size="large")
 
-# Championship History
+def get_logo_url(abbr):
+    return f"https://assets.nhle.com/logos/nhl/svg/{abbr}_light.svg"
+
+# Interní databáze
 TEAM_HISTORY = {
     "MTL": [24, 26, 0], "TOR": [13, 0, 0],  "DET": [11, 6, 6], 
     "BOS": [6, 5, 4],   "CHI": [6, 2, 2],   "EDM": [5, 10, 2], 
@@ -25,14 +27,10 @@ TEAM_HISTORY = {
     "CGY": [1, 3, 2]
 }
 
-# Conference Mapping
 EAST = ["BOS", "BUF", "DET", "FLA", "MTL", "OTT", "TBL", "TOR", "CAR", "CBJ", "NJD", "NYI", "NYR", "PHI", "PIT", "WSH"]
 WEST = ["CHI", "COL", "DAL", "MIN", "NSH", "STL", "WPG", "UTA", "ANA", "CGY", "EDM", "LAK", "SEA", "SJS", "VAN", "VGK"]
 
-# 
-def get_logo_url(abbr):
-    return f"https://assets.nhle.com/logos/nhl/svg/{abbr}_light.svg"
-
+# Správa dat
 @st.cache_data
 def fetch_api(endpoint, params=None):
     try:
@@ -81,13 +79,11 @@ def get_team_standings(conference=None):
     df = pd.DataFrame(rows).sort_values(by="Points", ascending=False)
     return df
 
-# UI LAYOUT
+### 4. Práce s daty, vizuální nastavení aplikaci
 st.title("NHL Stats Centre")
 
-# SIDEBAR NAVIGATION
 view = st.sidebar.radio("Navigation", ["Whole League", "Conference", "Team stats"])
 
-# TABLE CONFIGURATIONS
 main_config = {
     "Player": st.column_config.TextColumn("Player"),
     "Team": st.column_config.ImageColumn("Team", width="small"),
@@ -186,5 +182,6 @@ elif view == "Team stats":
                     "Save %": f"{p.get('savePercentage', 0):.3f}"
                 } for p in stats.get('goalies', [])])
                 st.dataframe(gl_df.sort_values("Wins", ascending=False), hide_index=True, use_container_width=True)
+
 
 
