@@ -121,7 +121,7 @@ if view == "Whole League" or view == "Conference":
     with g_tabs[0]: st.dataframe(get_leader_stats("goalie", "wins", conf_name), column_config=main_config, hide_index=True, use_container_width=True)
     with g_tabs[1]: 
         df_save = get_leader_stats("goalie", "savePctg", conf_name)
-        if not df_save.empty: df_save['Value'] = df_save['Value'].map(lambda x: f"{x:.3f}")
+        if not df_save.empty: df_save['Value'] = df_save['Value'].map(lambda x: f"{(x * 100):.2f}")
         st.dataframe(df_save, column_config=main_config, hide_index=True, use_container_width=True)
 
 elif view == "Team stats":
@@ -182,6 +182,7 @@ elif view == "Team stats":
                     "Save %": f"{p.get('savePercentage', 0):.3f}"
                 } for p in stats.get('goalies', [])])
                 st.dataframe(gl_df.sort_values("Wins", ascending=False), hide_index=True, use_container_width=True)
+
 
 
 
