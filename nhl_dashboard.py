@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 
-# streamlit run muj_projekt.py
+# 
 BASE_URL = "https://api-web.nhle.com/v1"
 SEASON = "20252026"  
 st.set_page_config(page_title="NHL Stats Center", layout="wide")
@@ -186,3 +186,4 @@ elif view == "Team stats":
                     "Save %": f"{p.get('savePercentage', 0):.3f}"
                 } for p in stats.get('goalies', [])])
                 st.dataframe(gl_df.sort_values("Wins", ascending=False), hide_index=True, use_container_width=True)
+
