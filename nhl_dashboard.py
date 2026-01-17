@@ -1,17 +1,17 @@
-﻿import streamlit as st
+import streamlit as st
 import requests
 import pandas as pd
 
-# --- CONFIG & CONSTANTS ---
+# streamlit run muj_projekt.py
 BASE_URL = "https://api-web.nhle.com/v1"
-SEASON = "20252026"  # Current Season
+SEASON = "20252026"  
 st.set_page_config(page_title="NHL Stats Center", layout="wide")
 
 # NHL Branding
 NHL_LOGO_URL = "https://assets.nhle.com/logos/nhl/svg/NHL_light.svg"
 st.logo(NHL_LOGO_URL, size="large")
 
-# Championship History (Updated Dec 2025)
+# Championship History
 TEAM_HISTORY = {
     "MTL": [24, 26, 0], "TOR": [13, 0, 0],  "DET": [11, 6, 6], 
     "BOS": [6, 5, 4],   "CHI": [6, 2, 2],   "EDM": [5, 10, 2], 
@@ -29,7 +29,7 @@ TEAM_HISTORY = {
 EAST = ["BOS", "BUF", "DET", "FLA", "MTL", "OTT", "TBL", "TOR", "CAR", "CBJ", "NJD", "NYI", "NYR", "PHI", "PIT", "WSH"]
 WEST = ["CHI", "COL", "DAL", "MIN", "NSH", "STL", "WPG", "UTA", "ANA", "CGY", "EDM", "LAK", "SEA", "SJS", "VAN", "VGK"]
 
-# --- HELPER FUNCTIONS ---
+# 
 def get_logo_url(abbr):
     return f"https://assets.nhle.com/logos/nhl/svg/{abbr}_light.svg"
 
@@ -78,11 +78,10 @@ def get_team_standings(conference=None):
             "Points": t['points'],
             "GP": t['gamesPlayed']
         })
-    # Sort by Points
     df = pd.DataFrame(rows).sort_values(by="Points", ascending=False)
     return df
 
-# --- UI LAYOUT ---
+# UI LAYOUT
 st.title("NHL Stats Centre")
 
 # SIDEBAR NAVIGATION
@@ -110,7 +109,6 @@ if view == "Whole League" or view == "Conference":
     else:
         st.header("League Overview")
 
-    # New Section: Team Standings (Points)
     st.subheader("Team standings")
     standings_df = get_team_standings(conf_name)
     st.dataframe(standings_df, column_config=standings_config, hide_index=True, use_container_width=True)
@@ -152,25 +150,39 @@ elif view == "Team stats":
             st.write("---")
             st.subheader("Top 3 Team Leaders")
             t_col1, t_col2, t_col3 = st.columns(3)
-            skaters = pd.DataFrame(stats['skaters'])
+            skaters_raw = pd.DataFrame(stats.get('skaters', []))
+            
             def fmt_name(row): return f"{row['firstName']['default']} {row['lastName']['default']}"
-            skaters['FullName'] = skaters.apply(fmt_name, axis=1)
+            if not skaters_raw.empty:
+                skaters_raw['FullName'] = skaters_raw.apply(fmt_name, axis=1)
 
-            with t_col1:
-                st.write("**Top 3 Goals**")
-                st.dataframe(skaters.sort_values("goals", ascending=False)[['FullName', 'goals']].head(3), hide_index=True)
-            with t_col2:
-                st.write("**Top 3 Assists**")
-                st.dataframe(skaters.sort_values("assists", ascending=False)[['FullName', 'assists']].head(3), hide_index=True)
-            with t_col3:
-                st.write("**Top 3 Points**")
-                st.dataframe(skaters.sort_values("points", ascending=False)[['FullName', 'points']].head(3), hide_index=True)
+                with t_col1:
+                    st.write("**Top 3 Goals**")
+                    st.dataframe(skaters_raw.sort_values("goals", ascending=False)[['FullName', 'goals']].head(3), hide_index=True)
+                with t_col2:
+                    st.write("**Top 3 Assists**")
+                    st.dataframe(skaters_raw.sort_values("assists", ascending=False)[['FullName', 'assists']].head(3), hide_index=True)
+                with t_col3:
+                    st.write("**Top 3 Points**")
+                    st.dataframe(skaters_raw.sort_values("points", ascending=False)[['FullName', 'points']].head(3), hide_index=True)
 
             st.write("---")
-            st.subheader("Full Roster Stats")
-            sk_df = pd.DataFrame([{
-                "Player": f"{p['firstName']['default']} {p['lastName']['default']}",
-                "G": p.get('goals', 0), "A": p.get('assists', 0), "P": p.get('points', 0)
-            } for p in stats['skaters']])
+            
+            st.subheader("Skaters roster")
+            if not skaters_raw.empty:
+                sk_df = pd.DataFrame([{
+                    "Player": f"{p['firstName']['default']} {p['lastName']['default']}",
+                    "G": p.get('goals', 0), "A": p.get('assists', 0), "P": p.get('points', 0)
+                } for p in stats.get('skaters', [])])
+                st.dataframe(sk_df.sort_values("P", ascending=False), hide_index=True, use_container_width=True)
 
-            st.dataframe(sk_df.sort_values("P", ascending=False), hide_index=True, use_container_width=True)
+           
+            st.subheader("Goalies roster")
+            goalies_raw = pd.DataFrame(stats.get('goalies', []))
+            if not goalies_raw.empty:
+                gl_df = pd.DataFrame([{
+                    "Player": f"{p['firstName']['default']} {p['lastName']['default']}",
+                    "Wins": p.get('wins', 0),
+                    "Save %": f"{p.get('savePercentage', 0):.3f}"
+                } for p in stats.get('goalies', [])])
+                st.dataframe(gl_df.sort_values("Wins", ascending=False), hide_index=True, use_container_width=True)
