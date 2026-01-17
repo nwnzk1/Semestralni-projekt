@@ -1,27 +1,33 @@
-# NHL Stats Center
+🏒 # NHL Stats Center
 
-Tento projekt je interaktivní webová aplikace postavená na frameworku **Streamlit**, která slouží k přehledné vizualizaci dat hokejové ligy NHL. 
+Tento projekt je interaktivní webová aplikace postavená na frameworku **Streamlit**, která slouží k přehledné vizualizaci dat hokejové ligy NHL 🥅. 
 Aplikace využívá oficiální **NHL API** pro získávání statistik v reálném čase a kombinuje je s interní databází historických úspěchů týmů.
 
 ---
-## Použité knihovny:
-[Streamlit](https://streamlit.io/)
-
-[Pandas](https://pandas.pydata.org/)
-
-[Requests](https://pypi.org/project/requests/)
+🚀 ## Klíčové funkce
+1. ⏱️ Živé statistiky: aktuální data přímo z NHL API. 
+2. 🔍 Interaktivní filtry: Možnost filtrování podle konferencí a jednotlivých teamů.
+3. 🏆 Přehled jednotlivých teamů: Aktuální soupiska, historie trofejí 
 
 ---
-## Spuštění projektu
+📚 ## Použité knihovny:
+🔹[Streamlit](https://streamlit.io/)
+
+🔹[Pandas](https://pandas.pydata.org/)
+
+🔹[Requests](https://pypi.org/project/requests/)
+
+---
+💻 ## Spuštění projektu
 
 Lokální spuštění projektu:
 
-1.  **Instalace potřebných knihoven**:
+1.  📦 **Instalace potřebných knihoven**:
     ```bash
     pip install streamlit requests pandas
     ```
 
-2.  **Spuštění aplikace**:
+2.  ⚙️ **Spuštění aplikace**: 
     ```bash
     py -m streamlit run nhl_dashboard.py
     ```
