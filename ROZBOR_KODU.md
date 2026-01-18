@@ -106,7 +106,7 @@ s_tabs = st.tabs(["Points", "Goals", "Assists"])
     with s_tabs[1]: st.dataframe(get_leader_stats("skater", "goals", conf_name), column_config=main_config, hide_index=True, use_container_width=True)
     with s_tabs[2]: st.dataframe(get_leader_stats("skater", "assists", conf_name), column_config=main_config, hide_index=True, use_container_width=True)
 ```
-`st.tabs(["Points", "Goals", "Assists"])` vytvoření jednotlivých záložek pro lepší orientaci
+`st.tabs(["Points", "Goals", "Assists"])` vytvoření jednotlivých záložek pro lepší orientaci, `st.dataframe()` je základní funkce, která nám umožnuje interakci s tabulkou (narozdíl od `st.table`)
 
 ```python
 st.subheader("Goalies")
@@ -129,7 +129,8 @@ elif view == "Team stats":
         abbr = team_map[selected_team]
 ```
 
-`team_map` 
+`team_map` - zde si ukládáme jak celý název teamu (=klíč), tak jejich zkratku (=hodnota), jedná se o tzv. Dictionary Comprehension (=zkrácený zápis pro slovník -> [ klíč : hodnota]), `list(team_map.keys())` - zde poté
+použijeme jen klíče, aby se zobrazoval celý název teamu (např. Boston Bruins, místo BOS), `abbr = team_map[selected_team]` zde poté hledáme hodnotu pomocí klíče
 
 ```python
 c1, c2 = st.columns([1, 4])
@@ -144,7 +145,8 @@ c1, c2 = st.columns([1, 4])
 ```
 `c1, c2 = st.columns([1, 4])` = rozložení stránky na dva sloupce v poměru 1:4, `c1` = sloupec pro logo, `c2` = sloupec pro text
 `h_col1, h_col2, h_col3 = st.columns(3)` = rozdělení c2 sloupce na 3 stejné sloupce, vytáhneme si historii teamu ze slovníku pomocí funkce `.get()` a poté si pomocí
-funkce `st.metric()` zobrazíme důležitá data, pro nás jsou to vyhrané trofeje jednotluvých teamů
+funkce `st.metric(label, value)` zobrazíme data 
+
 ```python
 stats = fetch_api(f"club-stats/{abbr}/{SEASON}/2")
         if stats:
@@ -153,4 +155,37 @@ stats = fetch_api(f"club-stats/{abbr}/{SEASON}/2")
             t_col1, t_col2, t_col3 = st.columns(3)
             skaters_raw = pd.DataFrame(stats.get('skaters', []))
 ```
-`skaters_raw = pd.DataFrame(stats.get('skaters', []))`
+`fetch_api(f"club-stats/{abbr}/{SEASON}/2")`, použití f-stringu, aby se při výběru jiného teamu, změnilo abbr 
+`stats.get('skaters', [])`, zde v API hledám klíč "skaters", pokud bych je nenašel, funkce `.get(klíč, default hodnota(klíč neexistuje))` vrátí prázdný seznam, aby program nevyhodil chybu, `DataFrame`
+prostě ukáže prázdnou tabulku
+```python
+def fmt_name(row): return f"{row['firstName']['default']} {row['lastName']['default']}"
+```
+Funkce pro formátování jména do správného tvaru (spojení jméno + příjmení)
+
+```python
+if not skaters_raw.empty:
+                skaters_raw['FullName'] = skaters_raw.apply(fmt_name, axis=1)
+
+                with t_col1:
+                    st.write("**Top 3 Goals**")
+                    st.dataframe(skaters_raw.sort_values("goals", ascending=False)[['FullName', 'goals']].head(3), hide_index=True)
+                with t_col2:
+                    st.write("**Top 3 Assists**")
+                    st.dataframe(skaters_raw.sort_values("assists", ascending=False)[['FullName', 'assists']].head(3), hide_index=True)
+                with t_col3:
+                    st.write("**Top 3 Points**")
+                    st.dataframe(skaters_raw.sort_values("points", ascending=False)[['FullName', 'points']].head(3), hide_index=True)
+```
+`skaters_raw['FullName'] = skaters_raw.apply(fmt_name, axis=1)` vytvoření sloupce s názvem "FullName", poté pomocí funkce `.apply()` vezmeme tabulku a `axis=1` nám pospojuje data po řádcích
+`with` říká streamlitu, aby vše dával do `t_col1`, poté vytvoříme interaktivní tabulku pomocí `st.dataframe` a pomocí `.sort_values` seřadíme tabulku skaters_raw, `.head(3)` nám ukáže jen TOP3
+
+```python
+st.subheader("Skaters roster")
+            if not skaters_raw.empty:
+                sk_df = pd.DataFrame([{
+                    "Player": f"{p['firstName']['default']} {p['lastName']['default']}",
+                    "G": p.get('goals', 0), "A": p.get('assists', 0), "P": p.get('points', 0)
+                } for p in stats.get('skaters', [])])
+                st.dataframe(sk_df.sort_values("P", ascending=False), hide_index=True, use_container_width=True)
+```
