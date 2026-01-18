@@ -5,9 +5,9 @@ Aplikace využívá oficiální **NHL API** pro získávání statistik v reáln
 
 ---
 ## Klíčové funkce
-1. Živé statistiky: aktuální data přímo z NHL API. 
+1. Živé statistiky: Aktuální data přímo z NHL API. 
 2. Interaktivní filtry: Možnost filtrování podle konferencí a jednotlivých teamů.
-3. Přehled jednotlivých teamů: Aktuální soupiska, historie trofejí 
+3. Přehled jednotlivých teamů: Aktuální soupiska, historie trofejí
 
 ---
 ## 📚 Použité knihovny:
@@ -19,6 +19,8 @@ Aplikace využívá oficiální **NHL API** pro získávání statistik v reáln
 
 ---
 ## Spuštění projektu
+
+[NHL Stats Center](https://nhlstatscenter.streamlit.app//)
 
 Lokální spuštění projektu:
 
