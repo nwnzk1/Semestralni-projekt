@@ -18,17 +18,6 @@ Aplikace využívá oficiální **NHL API** pro získávání statistik a kombin
 🔹[Requests](https://pypi.org/project/requests/)
 
 ---
-## Struktura projektu:
-Semestralni-projekt/
-├── .devcontainer/           # Konfigurace pro vývoj v Dockeru/Codespaces
-├── README.md                # Hlavní dokumentace projektu (popis, instalace)
-├── ROZBOR_KODU.md           # Podrobný technický popis fungování kódu
-├── nhl_dashboard.py         # Hlavní spouštěcí soubor aplikace (Streamlit)
-├── api_manager.py           # Logika pro komunikaci s oficiálním NHL API
-├── interni_databze.py       # Soubor obsahující statická data (např. historie trofejí)
-└── ui_configs.py            # Konfigurace vzhledu a prvků uživatelského rozhraní
-
----
 ## Spuštění projektu:
 
 Projekt je hostován na community cloudu přímo od Streamlitu:
